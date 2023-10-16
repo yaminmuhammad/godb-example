@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"time"
 
 	"database-example/entity"
 
@@ -22,24 +21,17 @@ var psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmod
 
 func main() {
 
-	student := entity.Student{Id: 9, Name: "Siti", Email: "siti@gmail.com", Address: "Depok", BirthDate: time.Date(2000, 11, 20, 0, 0, 0, 0, time.Local), Gender: "F"}
+	// student := entity.Student{Id: 9, Name: "Siti kocak", Email: "sitikocak@yahoo.com", Address: "Jakarta Selatan", BirthDate: time.Date(2000, 11, 20, 0, 0, 0, 0, time.Local), Gender: "F"}
 
-	addStudent(student)
+	// addStudent(student)
+	// updateStudent(student)
+	deleteStudent("9")
 }
 
 func addStudent(student entity.Student) {
-	db, err := sql.Open("postgres", psqlInfo)
-	if err != nil {
-		panic(err)
-	}
-
-	defer db.Close() // Close the database connection when we'r done with it.
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	} else {
-		fmt.Println("Successfully Connected")
-	}
+	db := connectDb()
+	defer db.Close()
+	var err error
 
 	// Untuk menghindari SQL Injection kita dapat menggunakan $
 
@@ -53,4 +45,56 @@ func addStudent(student entity.Student) {
 		fmt.Printf("Successfully Insert Data!")
 	}
 
+}
+
+func updateStudent(student entity.Student) {
+	db := connectDb()
+	defer db.Close()
+	var err error
+
+	// Untuk menghindari SQL Injection kita dapat menggunakan $
+
+	sqlStatement := "UPDATE mst_student SET name = $2, email = $3, address = $4, birth_date = $5, gender = $6 WHERE id = $1;"
+
+	_, err = db.Exec(sqlStatement, student.Id, student.Name, student.Email, student.Address, student.BirthDate, student.Gender)
+
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Printf("Successfully Update Data!")
+	}
+
+}
+
+func deleteStudent(id string) {
+	db := connectDb()
+	defer db.Close()
+	var err error
+
+	// Untuk menghindari SQL Injection kita dapat menggunakan $
+
+	sqlStatement := "DELETE FROM mst_student WHERE id = $1;"
+
+	_, err = db.Exec(sqlStatement, id)
+
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Printf("Successfully Delete Data!")
+	}
+}
+
+func connectDb() *sql.DB {
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+	// Close the database connection when we'r done with it.
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Successfully Connected")
+	}
+	return db
 }
