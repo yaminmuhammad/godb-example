@@ -3,6 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"time"
+
+	"database-example/entity"
 
 	_ "github.com/lib/pq"
 )
@@ -18,10 +21,13 @@ const (
 var psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 func main() {
-	addStudent("8", "Andi", "andi@yahoo.com", "Tangerang", "2000-12-22", "M")
+
+	student := entity.Student{Id: 9, Name: "Siti", Email: "siti@gmail.com", Address: "Depok", BirthDate: time.Date(2000, 11, 20, 0, 0, 0, 0, time.Local), Gender: "F"}
+
+	addStudent(student)
 }
 
-func addStudent(id, name, email, address, birthDate, gender string) {
+func addStudent(student entity.Student) {
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
@@ -39,7 +45,7 @@ func addStudent(id, name, email, address, birthDate, gender string) {
 
 	sqlStatement := "INSERT INTO mst_student (id, name, email, address, birth_date, gender) VALUES ($1, $2, $3, $4, $5, $6);"
 
-	_, err = db.Exec(sqlStatement, id, name, email, address, birthDate, gender)
+	_, err = db.Exec(sqlStatement, student.Id, student.Name, student.Email, student.Address, student.BirthDate, student.Gender)
 
 	if err != nil {
 		panic(err)
