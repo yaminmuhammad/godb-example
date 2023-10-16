@@ -18,7 +18,7 @@ const (
 var psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 
 func main() {
-	addStudent("7", "Kiko", "kiko@yahoo.com", "Bogor", "1998-03-20", "M")
+	addStudent("8", "Andi", "andi@yahoo.com", "Tangerang", "2000-12-22", "M")
 }
 
 func addStudent(id, name, email, address, birthDate, gender string) {
@@ -34,11 +34,12 @@ func addStudent(id, name, email, address, birthDate, gender string) {
 	} else {
 		fmt.Println("Successfully Connected")
 	}
-	// Create a new table in the database called 'users'.
 
-	sqlStatement := "INSERT INTO mst_student (id, name, email, address, birth_date, gender) VALUES (" + id + "," + "'" + name + "'" + "," + "'" + email + "'" + "," + "'" + address + "'" + "," + "'" + birthDate + "'" + "," + "'" + gender + "'" + ");"
+	// Untuk menghindari SQL Injection kita dapat menggunakan $
 
-	_, err = db.Exec(sqlStatement)
+	sqlStatement := "INSERT INTO mst_student (id, name, email, address, birth_date, gender) VALUES ($1, $2, $3, $4, $5, $6);"
+
+	_, err = db.Exec(sqlStatement, id, name, email, address, birthDate, gender)
 
 	if err != nil {
 		panic(err)
