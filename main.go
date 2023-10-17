@@ -25,7 +25,12 @@ func main() {
 
 	// addStudent(student)
 	// updateStudent(student)
-	deleteStudent("9")
+	// deleteStudent("9")
+	// students := getAllStudent()
+	// for _, student := range students {
+	// 	fmt.Println(student.Id, student.Name, student.Email, student.Address, student.BirthDate, student.Gender)
+	// }
+	fmt.Println(getStudentById(7))
 }
 
 func addStudent(student entity.Student) {
@@ -82,6 +87,61 @@ func deleteStudent(id string) {
 	} else {
 		fmt.Printf("Successfully Delete Data!")
 	}
+}
+
+func getAllStudent() []entity.Student {
+	db := connectDb()
+	defer db.Close()
+
+	sqlStatement := "SELECT * FROM mst_student;"
+
+	rows, err := db.Query(sqlStatement)
+
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	students := scanStudent(rows)
+
+	return students
+}
+
+func scanStudent(rows *sql.Rows) []entity.Student {
+	students := []entity.Student{}
+	var err error
+
+	for rows.Next() {
+		student := entity.Student{}
+		err := rows.Scan(&student.Id, &student.Name, &student.Email, &student.Address, &student.BirthDate, &student.Gender)
+		if err != nil {
+			panic(err)
+		}
+
+		students = append(students, student)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		panic(err)
+	}
+
+	return students
+}
+
+func getStudentById(id int) entity.Student {
+	db := connectDb()
+	defer db.Close()
+	var err error
+
+	sqlStatement := "SELECT * FROM mst_student WHERE id = $1;"
+
+	student := entity.Student{}
+	err = db.QueryRow(sqlStatement, id).Scan(&student.Id, &student.Name, &student.Email, &student.Address, &student.BirthDate, &student.Gender)
+	if err != nil {
+		panic(err)
+	}
+	return student
 }
 
 func connectDb() *sql.DB {
