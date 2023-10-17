@@ -30,7 +30,11 @@ func main() {
 	// for _, student := range students {
 	// 	fmt.Println(student.Id, student.Name, student.Email, student.Address, student.BirthDate, student.Gender)
 	// }
-	fmt.Println(getStudentById(7))
+	// fmt.Println(getStudentById(7))
+	students := searchBy("ik", "2000-11-30")
+	for _, student := range students {
+		fmt.Println(student.Id, student.Name, student.Email, student.Address, student.BirthDate, student.Gender)
+	}
 }
 
 func addStudent(student entity.Student) {
@@ -142,6 +146,21 @@ func getStudentById(id int) entity.Student {
 		panic(err)
 	}
 	return student
+}
+
+func searchBy(name string, birthDate string) []entity.Student {
+	db := connectDb()
+	defer db.Close()
+
+	sqlStatement := "SELECT * FROM mst_student WHERE name LIKE $1 AND birth_date = $2;"
+
+	rows, err := db.Query(sqlStatement, "%"+name+"%", birthDate)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+	students := scanStudent(rows)
+	return students
 }
 
 func connectDb() *sql.DB {
